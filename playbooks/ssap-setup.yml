@@ -95,15 +95,14 @@
         credentials:
           - "AWS Credentials"
         labels:
-          - "aws"
           - "{{ item.labels }}"
         state: "present"
       with_items:
-        - { playbook: 'New AWS Provisioning Workflow.yml', name: 'Cloud/AWS AWS Provisioning Workflow', description: 'NEW AWS Provisioning Workflow'  }
-        - { playbook: 'create_aws_ec2_rhel10.yml', name: 'Cloud/AWS Create RHEL10 instance', labels: 'rhel', description: 'Run a job template to create a RHEL 10 instance and provide some details' }
-        - { playbook: 'create_aws_ec2_rhel9.yml', name: 'Cloud/AWS Create RHEL9 instance', labels: 'rhel', description: 'Run a job template to create a RHEL 9 instance and provide some details' }
-        - { playbook: 'create_aws_vpc.yml', name: 'Cloud/AWS Create VCP', description: 'Run a job template to create an AWS VPC, and all its required networking' }
-        - { playbook: 'snapshot_aws_ec2.yml', name: 'Cloud/AWS Snapshot ec2 instance', description: 'Run a job template to capture a snapshot of an AWS ec2 instance' }
+        - { playbook: 'New AWS Provisioning Workflow.yml', name: 'Cloud/AWS AWS Provisioning Workflow', labels: 'aws',description: 'NEW AWS Provisioning Workflow'  }
+        - { playbook: 'create_aws_ec2_rhel10.yml', name: 'Cloud/AWS Create RHEL10 instance', labels: {'aws','rhel'}, description: 'Run a job template to create a RHEL 10 instance and provide some details' }
+        - { playbook: 'create_aws_ec2_rhel9.yml', name: 'Cloud/AWS Create RHEL9 instance', labels: {'aws','rhel'}, description: 'Run a job template to create a RHEL 9 instance and provide some details' }
+        - { playbook: 'create_aws_vpc.yml', name: 'Cloud/AWS Create VCP', labels: 'aws', description: 'Run a job template to create an AWS VPC, and all its required networking' }
+        - { playbook: 'snapshot_aws_ec2.yml', name: 'Cloud/AWS Snapshot ec2 instance', labels: 'aws', description: 'Run a job template to capture a snapshot of an AWS ec2 instance' }
 
     - name: Create the Network related job templates
       ansible.controller.job_template:
@@ -141,9 +140,9 @@
           - "{{ item.labels }}"
         state: "present"
       with_items:
-        - { playbook: 'deploy_application_to_rhel.yml', name: 'Linux/RHEL Deploy Applications to RHEL', description: 'Run a job template to deploy applications to RHEL servers' }
-        - { playbook: 'install_nginx.yml', name: 'Linux/RHEL Install NGINX on RHEL', description: 'Run a job template to install NGINX on RHEL' }
-        - { playbook: 'patch_rhel_servers.yml', name: 'Linux/RHEL Patch RHEL Servers', description: 'Run a job template to patch RHEL servers' }
-        - { playbook: 'start_rhel_service.yml', name: 'Linux/RHEL START Service on RHEL', description: 'Run a job template to START a Linux service that you provide on RHEL' }
-        - { playbook: 'stop_rhel_service.yml', name: 'Linux/RHEL STOP Service on RHEL', description: 'Run a job template to STOP a Linux service that you provide on RHEL' }
-        - { playbook: 'update_rhel_time_server.yml', name: 'RHEL / Update RHEL Time Servers', labels: 'custom', description: 'CUSTOM TEMPLATE in Self-Service' }
+        - { playbook: 'deploy_application_to_rhel.yml', name: 'Linux/RHEL Deploy Applications to RHEL', labels: 'rhel', description: 'Run a job template to deploy applications to RHEL servers' }
+        - { playbook: 'install_nginx.yml', name: 'Linux/RHEL Install NGINX on RHEL', labels: 'rhel', description: 'Run a job template to install NGINX on RHEL' }
+        - { playbook: 'patch_rhel_servers.yml', name: 'Linux/RHEL Patch RHEL Servers', labels: 'rhel', description: 'Run a job template to patch RHEL servers' }
+        - { playbook: 'start_rhel_service.yml', name: 'Linux/RHEL START Service on RHEL', labels: 'rhel', description: 'Run a job template to START a Linux service that you provide on RHEL' }
+        - { playbook: 'stop_rhel_service.yml', name: 'Linux/RHEL STOP Service on RHEL', labels: 'rhel', description: 'Run a job template to STOP a Linux service that you provide on RHEL' }
+        - { playbook: 'update_rhel_time_server.yml', name: 'RHEL / Update RHEL Time Servers', labels: {'rhel','custom'}, description: 'CUSTOM TEMPLATE in Self-Service' }
