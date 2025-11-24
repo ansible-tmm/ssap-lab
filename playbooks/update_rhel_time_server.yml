@@ -1,0 +1,22 @@
+---
+- name: Update RHEL time servers
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Update RHEL time servers
+      ansible.builtin.debug:
+        msg: |
+          Updating the RHEL time servers
+
+    - name: Waiting for RHEL time servers update to complete
+      ansible.builtin.command: sleep 3
+      changed_when: false
+      no_log: true
+
+    - name: Update RHEL time servers...complete
+      ansible.builtin.debug:
+        msg: |
+          Updating the RHEL time servers...completed

@@ -1,0 +1,20 @@
+---
+- name: Deploy the network configuration to the network device
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Deploy the network configuration to the network device
+      ansible.builtin.debug:
+        msg: "Deploying the network configuration to the network device..."
+
+    - name: Waiting for network configuration deployment to complete
+      ansible.builtin.pause:
+        seconds: 3
+      changed_when: false
+      no_log: true
+
+    - name: Status of the network configuration deployment
+      ansible.builtin.debug:
+        msg: "Network configuration deployment to the network device is complete successfully!"

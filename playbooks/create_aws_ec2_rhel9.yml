@@ -1,0 +1,20 @@
+---
+- name: Deploy the Lamna RHEL 9 servers
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Deploy the Lamna RHEL 9 servers
+      ansible.builtin.debug:
+        msg: "Deploying the RHEL 9 servers with Lamna Standards for RHEL 9 Servers..."
+
+    - name: Waiting for RHEL 9 servers to be deployed
+      ansible.builtin.pause:
+        seconds: 3
+      changed_when: false
+      no_log: true
+
+    - name: Status of the RHEL 9 servers
+      ansible.builtin.debug:
+        msg: "RHEL 9 Servers deployment is complete!"

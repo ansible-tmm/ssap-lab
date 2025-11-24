@@ -1,0 +1,22 @@
+---
+- name: Create AWS VPC
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Create the AWS VPC
+      ansible.builtin.debug:
+        msg: |
+          Creating the VPC including the subnets and internet gateway
+
+    - name: Waiting for completion of VPC creation
+      ansible.builtin.command: sleep 3
+      changed_when: false
+      no_log: true
+
+    - name: Creation of the VPC including the subnets and internet gateway...complete
+      ansible.builtin.debug:
+        msg: |
+          VPC including the subnets and internet gateway creation is complete successfully

@@ -1,0 +1,39 @@
+---
+- name: New AWS Provisioning Workflow
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Deploy the PostgreSQL DB
+      ansible.builtin.debug:
+        msg: |
+          Deploying the PostgreSQL DB with Lamna Standards to RHEL Server
+
+    - name: Waiting for DB Deploy to complete
+      ansible.builtin.command: sleep 3
+      changed_when: false
+      no_log: true
+
+    - name: Deploy the PostgreSQL DB...complete
+      ansible.builtin.debug:
+        msg: |
+          Deploying the PostgreSQL DB with Lamna Standards to RHEL Server...completed
+
+# ----------------------------------------
+
+    - name: Apply the PostgreSQL DB settings
+      ansible.builtin.debug:
+        msg: |
+          Applying the PostgreSQL DB settings
+
+    - name: Waiting for DB settings to complete
+      ansible.builtin.command: sleep 3
+      changed_when: false
+      no_log: true
+
+    - name: Apply the PostgreSQL DB settings...complete
+      ansible.builtin.debug:
+        msg: |
+          Settings applied successfully to the PostgreSQL DB

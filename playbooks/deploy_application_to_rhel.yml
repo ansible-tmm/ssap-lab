@@ -1,0 +1,20 @@
+---
+- name: Deploy the application to the RHEL servers
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Deploy the application to the RHEL servers
+      ansible.builtin.debug:
+        msg: "Deploying the application to the RHEL servers..."
+
+    - name: Waiting for application to be deployed
+      ansible.builtin.pause:
+        seconds: 3
+      changed_when: false
+      no_log: true
+
+    - name: Status of the application deployment
+      ansible.builtin.debug:
+        msg: "Application deployment to the RHEL servers is complete successfully!"

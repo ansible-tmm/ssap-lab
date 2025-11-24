@@ -1,0 +1,20 @@
+---
+- name: Patch the RHEL servers
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Patch the RHEL servers
+      ansible.builtin.debug:
+        msg: "Patching the RHEL servers..."
+
+    - name: Waiting for RHEL servers to be patched
+      ansible.builtin.pause:
+        seconds: 3
+      changed_when: false
+      no_log: true
+
+    - name: Status of the RHEL servers patching
+      ansible.builtin.debug:
+        msg: "RHEL servers patching is complete successfully!"

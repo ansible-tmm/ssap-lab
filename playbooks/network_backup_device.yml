@@ -1,0 +1,20 @@
+---
+- name: Backup the network device
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Backup the network device
+      ansible.builtin.debug:
+        msg: "Backing up the network device..."
+
+    - name: Waiting for network device backup to complete
+      ansible.builtin.pause:
+        seconds: 3
+      changed_when: false
+      no_log: true
+
+    - name: Status of the network device backup
+      ansible.builtin.debug:
+        msg: "Network device backup is complete successfully!"

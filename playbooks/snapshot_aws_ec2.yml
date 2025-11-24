@@ -1,0 +1,20 @@
+---
+- name: Snapshot the AWS EC2 instances
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Snapshot the AWS EC2 instance
+      ansible.builtin.debug:
+        msg: "Snapshotting the AWS EC2 instance..."
+
+    - name: Waiting for AWS EC2 instance to be snapped
+      ansible.builtin.pause:
+        seconds: 23
+      changed_when: false
+      no_log: true
+
+    - name: Status of the AWS EC2 instance snapshot
+      ansible.builtin.debug:
+        msg: "AWS EC2 instance snapshot is complete successfully!"

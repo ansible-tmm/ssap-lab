@@ -1,0 +1,20 @@
+---
+- name: Stop the RHEL service
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Stop the RHEL service
+      ansible.builtin.debug:
+        msg: "Stopping the RHEL service..."
+
+    - name: Waiting for RHEL service to be stopped
+      ansible.builtin.pause:
+        seconds: 3
+      changed_when: false
+      no_log: true
+
+    - name: Status of the RHEL service stopping
+      ansible.builtin.debug:
+        msg: "RHEL service stopping is completed successfully!"

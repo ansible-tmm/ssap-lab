@@ -1,0 +1,20 @@
+---
+- name: Onboard the network device
+  hosts: localhost
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Onboard the network device
+      ansible.builtin.debug:
+        msg: "Onboarding the network device..."
+
+    - name: Waiting for network device onboarding to complete
+      ansible.builtin.pause:
+        seconds: 3
+      changed_when: false
+      no_log: true
+
+    - name: Status of the network device onboarding
+      ansible.builtin.debug:
+        msg: "Network device onboarding is complete successfully!"
