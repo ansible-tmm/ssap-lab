@@ -40,6 +40,7 @@ yarn.lock
 **/venv
 **/.venv
 ansible.cfg
+**/.ansible/
 .DS_Store
 .lock
 .venv
