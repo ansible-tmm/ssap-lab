@@ -2,7 +2,7 @@
 - name: Setup Pre requisites for the self-service portal workshop environment
   hosts: localhost
   gather_facts: false
-  become: true
+  become: false
 
   tasks:
 
