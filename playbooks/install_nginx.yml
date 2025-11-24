@@ -1,0 +1,22 @@
+---
+- name: Install nginx on Web Server
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_deprecation_warnings: false
+    ansible_command_warnings: false
+  tasks:
+    - name: Install nginx
+      ansible.builtin.debug:
+        msg: |
+          Installing the nginx to the web server
+
+    - name: Waiting for nginx installation to complete
+      ansible.builtin.command: sleep 3
+      changed_when: false
+      no_log: true
+
+    - name: Install nginx on Web Server...complete
+      ansible.builtin.debug:
+        msg: |
+          Installing the nginx to the Web Server...completed
