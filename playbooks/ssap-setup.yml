@@ -50,7 +50,7 @@
         state: present
         credential_type: "Microsoft Azure Resource Manager"
         inputs:
-          subscription_id: "blahblahblahSUBSCRIPTIONID"
+          subscription: "blahblahblahSUBSCRIPTIONID"
 
     - name: Add other credentials
       ansible.controller.credential:
