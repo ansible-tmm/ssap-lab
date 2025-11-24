@@ -39,8 +39,8 @@
         state: present
         credential_type: "Amazon Web Services"
         inputs:
-          access_key: "blahblahblahAWSACCESSKEYID"
-          access_secret: "blahblahlahAWSSECRETACCESSKEY"
+          aws_access_key: "blahblahblahAWSACCESSKEYID"
+          aws_secret_key: "blahblahlahAWSSECRETACCESSKEY"
 
     - name: Add Azure credential
       ansible.controller.credential:
