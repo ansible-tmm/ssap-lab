@@ -58,8 +58,6 @@
         organization: "Default"
         state: present
         credential_type: "{{ item.credential_type }}"
-        inputs:
-          "{{ item.inputs }}"
       loop:
         - { name: "RHEL - SSH Credentials", credential_type: "Machine" }
         - { name: "Network Credentials", credential_type: "Machine" }
