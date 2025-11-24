@@ -90,6 +90,7 @@
         job_type: "run"
         organization: "Default"
         inventory: "AWS Inventory"
+        ask_inventory_on_launch: true
         project: "SelfService Demo playbooks"
         playbook: "playbooks/{{ item.playbook }}"
         credentials:
@@ -110,6 +111,7 @@
         job_type: "run"
         organization: "Default"
         inventory: "Network Inventory"
+        ask_inventory_on_launch: true
         project: "SelfService Demo playbooks"
         playbook: "playbooks/{{ item.playbook }}"
         credentials:
@@ -129,6 +131,7 @@
         job_type: "run"
         organization: "Default"
         inventory: "RHEL Inventory"
+        ask_inventory_on_launch: true
         project: "SelfService Demo playbooks"
         playbook: "playbooks/{{ item.playbook }}"
         credentials:
