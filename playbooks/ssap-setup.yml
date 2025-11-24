@@ -76,7 +76,7 @@
         default_environment: "Default execution environment"
 
     - name: Add labels to the AAP Organization
-      label:
+      ansible.controller.label:
         name: "{{ item.name }}"
         organization: "Default"
       loop:
