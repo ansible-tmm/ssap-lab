@@ -94,8 +94,7 @@
         playbook: "playbooks/{{ item.playbook }}"
         credentials:
           - "AWS Credentials"
-        labels:
-          - "{{ item.labels }}"
+        labels: "{{ item.labels }}"
         state: "present"
       with_items:
         - { playbook: 'New AWS Provisioning Workflow.yml', name: 'Cloud/AWS AWS Provisioning Workflow', labels: 'aws',description: 'NEW AWS Provisioning Workflow'  }
@@ -115,8 +114,7 @@
         playbook: "playbooks/{{ item.playbook }}"
         credentials:
           - "Network Credentials"
-        labels:
-          - "network"
+        labels: "network"
         state: "present"
       with_items:
         - { playbook: 'network_backup_device.yml', name: 'Network/Backup Network Device', description: 'Run a job template to backup a network device' }
@@ -135,9 +133,7 @@
         playbook: "playbooks/{{ item.playbook }}"
         credentials:
           - "RHEL - SSH Credentials"
-        labels:
-          - "rhel"
-          - "{{ item.labels }}"
+        labels: "{{ item.labels }}"
         state: "present"
       with_items:
         - { playbook: 'deploy_application_to_rhel.yml', name: 'Linux/RHEL Deploy Applications to RHEL', labels: 'rhel', description: 'Run a job template to deploy applications to RHEL servers' }
