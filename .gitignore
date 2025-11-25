@@ -45,3 +45,5 @@ ansible.cfg
 .lock
 .venv
 **/.vscode
+**/.devcontainer
+**/devcontainer.json
