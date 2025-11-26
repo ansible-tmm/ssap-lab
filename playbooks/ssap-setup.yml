@@ -15,9 +15,9 @@
         last_name: "{{ item.last_name }}"
         state: present
       loop:
-        - { username: "clouduser1",  password: "ansible123!", email: "clouduser1@example.org",  first_name: "Cloud", last_name: "CloudUser1" }
-        - { username: "networkuser1", password: "ansible123!",  email: "networkuser1@example.org", first_name: "Network", last_name: "NetworkUser1" }
-        - { username: "rheluser1", password: "ansible123!",  email: "rheluser1@example.org", first_name: "RHEL", last_name: "RHELUser1" }
+        - { username: "clouduser1", password: "ansible123!", email: "clouduser1@example.org", first_name: "Cloud", last_name: "CloudUser1" }
+        - { username: "networkuser1", password: "ansible123!", email: "networkuser1@example.org", first_name: "Network", last_name: "NetworkUser1" }
+        - { username: "rheluser1", password: "ansible123!", email: "rheluser1@example.org", first_name: "RHEL", last_name: "RHELUser1" }
 
     - name: Add all the workshop inventories
       ansible.controller.inventory:
@@ -99,7 +99,7 @@
         labels: "{{ item.labels }}"
         state: "present"
       with_items:
-        - { playbook: 'New AWS Provisioning Workflow.yml', name: 'Cloud/AWS AWS Provisioning Workflow', labels: 'aws',description: 'NEW AWS Provisioning Workflow'  }
+        - { playbook: 'New AWS Provisioning Workflow.yml', name: 'Cloud/AWS AWS Provisioning Workflow', labels: 'aws', description: 'NEW AWS Provisioning Workflow' }
         - { playbook: 'create_aws_ec2_rhel10.yml', name: 'Cloud/AWS Create RHEL10 instance', labels: ['aws', 'rhel'], description: 'Run a job template to create a RHEL 10 instance and provide some details' }
         - { playbook: 'create_aws_ec2_rhel9.yml', name: 'Cloud/AWS Create RHEL9 instance', labels: ['aws', 'rhel'], description: 'Run a job template to create a RHEL 9 instance and provide some details' }
         - { playbook: 'create_aws_vpc.yml', name: 'Cloud/AWS Create VCP', labels: 'aws', description: 'Run a job template to create an AWS VPC, and all its required networking' }
