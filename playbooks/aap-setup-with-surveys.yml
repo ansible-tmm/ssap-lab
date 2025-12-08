@@ -438,7 +438,7 @@
                 - Podman
                 - MariaDB
                 - PostgreSQL
-                - vi improved (vim)
+                - viImproved
 
     - name: Linux/RHEL Install NGINX on RHEL
       ansible.controller.job_template:
@@ -489,17 +489,20 @@
         ask_credential_on_launch: true
         survey_enabled: true
         survey_spec:
-          - question_name: Enter a name for the RHEL server you want to PATCH
-            question_description: RHEL server you want to PATCH
-            required: true
-            type: multiselect
-            variable: host
-            choices:
-              - rhel1
-              - rhel2
-              - rhel3
-              - rhel4
-            default: rhel1
+          name: ""
+          description: ""
+          spec:         
+            - question_name: Enter a name for the RHEL server you want to PATCH
+              question_description: RHEL server you want to PATCH
+              required: true
+              type: multiselect
+              variable: host
+              choices:
+                - rhel1
+                - rhel2
+                - rhel3
+                - rhel4
+              default: rhel1
 
     - name: Linux/RHEL START Service on RHEL
       ansible.controller.job_template:
