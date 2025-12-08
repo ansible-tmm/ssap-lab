@@ -331,6 +331,7 @@
                 - "Fortinet firewall"
                 - "Check Point firewall"
                 - "Cisco Meraki"
+              default: ""
 
     - name: Network/Onboard Network device
       ansible.controller.job_template:
@@ -364,6 +365,7 @@
                 - "Fortinet Firewall"
                 - "Check Point Firewall"
                 - "Cisco Meraki"
+              default: ""
 
     - name: Network/Restore Network device
       ansible.controller.job_template:
@@ -395,7 +397,8 @@
                 - cisco9400-ent2
                 - juniperex4600-ent1
                 - arubacx9300-ent1
-
+              default: ""
+              
     # RHEL Job Templates
     - name: Linux/RHEL Deploy Applications to RHEL
       ansible.controller.job_template:
