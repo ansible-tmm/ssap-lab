@@ -325,12 +325,12 @@
               type: multiselect
               variable: networkdevice
               choices:
-                - Cisco Catalyst 8500
-                - Cisco Switch
-                - Aruba Switch
-                - Fortinet firewall
-                - Check Point firewall
-                - Cisco Meraki
+                - "Cisco Catalyst 8500"
+                - "Cisco Switch"
+                - "Aruba Switch"
+                - "Fortinet firewall"
+                - "Check Point firewall"
+                - "Cisco Meraki"
 
     - name: Network/Onboard Network device
       ansible.controller.job_template:
@@ -358,12 +358,12 @@
               type: multiselect
               variable: networkdevice
               choices:
-                - Cisco Catalyst 8500
-                - Cisco Switch
-                - Aruba Switch
-                - Fortinet firewall
-                - Check Point firewall
-                - Cisco Meraki
+                - "Cisco Catalyst 8500" 
+                - "Cisco Switch"  
+                - "Aruba Switch"
+                - "Fortinet Firewall"
+                - "Check Point Firewall"
+                - "Cisco Meraki"
 
     - name: Network/Restore Network device
       ansible.controller.job_template:
@@ -438,7 +438,8 @@
                 - Podman
                 - MariaDB
                 - PostgreSQL
-                - viImproved
+                - "vi Improved (vim)"
+              default: Apache
 
     - name: Linux/RHEL Install NGINX on RHEL
       ansible.controller.job_template:
@@ -572,6 +573,7 @@
                 - rhel2
                 - rhel3
                 - rhel4
+              default: rhel1
             - question_name: Enter a name for the RHEL SERVICE you want to STOP
               question_description: Enter the service you want to STOP
               required: true
