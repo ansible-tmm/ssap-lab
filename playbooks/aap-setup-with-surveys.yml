@@ -6,148 +6,148 @@
 
   tasks:
 
-    - name: Add workshop users
-      ansible.platform.user:
-        username: "{{ item.username }}"
-        password: "{{ item.password }}"
-        email: "{{ item.email }}"
-        first_name: "{{ item.first_name }}"
-        last_name: "{{ item.last_name }}"
-        state: present
-      loop:
-        - { username: "clouduser1", password: "ansible123!", email: "clouduser1@example.org", first_name: "Cloud", last_name: "CloudUser1" }
-        - { username: "networkuser1", password: "ansible123!", email: "networkuser1@example.org", first_name: "Network", last_name: "NetworkUser1" }
-        - { username: "rheluser1", password: "ansible123!", email: "rheluser1@example.org", first_name: "RHEL", last_name: "RHELUser1" }
+    # - name: Add workshop users
+    #   ansible.platform.user:
+    #     username: "{{ item.username }}"
+    #     password: "{{ item.password }}"
+    #     email: "{{ item.email }}"
+    #     first_name: "{{ item.first_name }}"
+    #     last_name: "{{ item.last_name }}"
+    #     state: present
+    #   loop:
+    #     - { username: "clouduser1", password: "ansible123!", email: "clouduser1@example.org", first_name: "Cloud", last_name: "CloudUser1" }
+    #     - { username: "networkuser1", password: "ansible123!", email: "networkuser1@example.org", first_name: "Network", last_name: "NetworkUser1" }
+    #     - { username: "rheluser1", password: "ansible123!", email: "rheluser1@example.org", first_name: "RHEL", last_name: "RHELUser1" }
 
-    - name: Add all the workshop inventories
-      ansible.controller.inventory:
-        name: "{{ item.name }}"
-        organization: "Default"
-        state: present
-      loop:
-        - { name: "AWS Inventory" }
-        - { name: "Azure Inventory" }
-        - { name: "GCP Inventory" }
-        - { name: "RHEL Inventory" }
-        - { name: "Network Inventory" }
+    # - name: Add all the workshop inventories
+    #   ansible.controller.inventory:
+    #     name: "{{ item.name }}"
+    #     organization: "Default"
+    #     state: present
+    #   loop:
+    #     - { name: "AWS Inventory" }
+    #     - { name: "Azure Inventory" }
+    #     - { name: "GCP Inventory" }
+    #     - { name: "RHEL Inventory" }
+    #     - { name: "Network Inventory" }
 
-    - name: Add AWS credential
-      ansible.controller.credential:
-        name: AWS Credentials
-        description: Amazon Web Services
-        organization: "Default"
-        state: present
-        credential_type: "Amazon Web Services"
-        inputs:
-          username: "blahblahblahAWSACCESSKEYID"
-          password: "blahblahlahAWSSECRETACCESSKEY"
+    # - name: Add AWS credential
+    #   ansible.controller.credential:
+    #     name: AWS Credentials
+    #     description: Amazon Web Services
+    #     organization: "Default"
+    #     state: present
+    #     credential_type: "Amazon Web Services"
+    #     inputs:
+    #       username: "blahblahblahAWSACCESSKEYID"
+    #       password: "blahblahlahAWSSECRETACCESSKEY"
 
-    - name: Add Azure credential
-      ansible.controller.credential:
-        name: Azure Credentials
-        description: Microsoft Azure
-        organization: "Default"
-        state: present
-        credential_type: "Microsoft Azure Resource Manager"
-        inputs:
-          subscription: "blahblahblahSUBSCRIPTIONID"
+    # - name: Add Azure credential
+    #   ansible.controller.credential:
+    #     name: Azure Credentials
+    #     description: Microsoft Azure
+    #     organization: "Default"
+    #     state: present
+    #     credential_type: "Microsoft Azure Resource Manager"
+    #     inputs:
+    #       subscription: "blahblahblahSUBSCRIPTIONID"
 
-    - name: Add other credentials
-      ansible.controller.credential:
-        name: "{{ item.name }}"
-        organization: "Default"
-        state: present
-        credential_type: "{{ item.credential_type }}"
-      loop:
-        - { name: "RHEL - SSH Credentials", credential_type: "Machine" }
-        - { name: "Network Credentials", credential_type: "Machine" }
+    # - name: Add other credentials
+    #   ansible.controller.credential:
+    #     name: "{{ item.name }}"
+    #     organization: "Default"
+    #     state: present
+    #     credential_type: "{{ item.credential_type }}"
+    #   loop:
+    #     - { name: "RHEL - SSH Credentials", credential_type: "Machine" }
+    #     - { name: "Network Credentials", credential_type: "Machine" }
 
 
-    - name: Add project
-      ansible.controller.project:
-        name: "SelfService Demo playbooks"
-        description: "This is a project for the self-service portal demos"
-        organization: "Default"
-        state: present
-        scm_type: git
-        scm_url: https://github.com/ansible-tmm/ssap-lab
-        default_environment: "Default execution environment"
+    # - name: Add project
+    #   ansible.controller.project:
+    #     name: "SelfService Demo playbooks"
+    #     description: "This is a project for the self-service portal demos"
+    #     organization: "Default"
+    #     state: present
+    #     scm_type: git
+    #     scm_url: https://github.com/ansible-tmm/ssap-lab
+    #     default_environment: "Default execution environment"
 
-    - name: Add labels to the AAP Organization
-      ansible.controller.label:
-        name: "{{ item.name }}"
-        organization: "Default"
-      loop:
-        - { name: "aws" }
-        - { name: "rhel" }
-        - { name: "network" }
-        - { name: "custom" }
+    # - name: Add labels to the AAP Organization
+    #   ansible.controller.label:
+    #     name: "{{ item.name }}"
+    #     organization: "Default"
+    #   loop:
+    #     - { name: "aws" }
+    #     - { name: "rhel" }
+    #     - { name: "network" }
+    #     - { name: "custom" }
 
-    - name: Create the AWS related job templates
-      ansible.controller.job_template:
-        name: "{{ item.name }}"
-        description: "{{ item.description }}"
-        job_type: "run"
-        organization: "Default"
-        inventory: "AWS Inventory"
-        ask_inventory_on_launch: true
-        ask_credential_on_launch: true
-        project: "SelfService Demo playbooks"
-        playbook: "playbooks/{{ item.playbook }}"
-        credentials:
-          - "AWS Credentials"
-        labels: "{{ item.labels }}"
-        state: "present"
-      with_items:
-        - { playbook: 'New AWS Provisioning Workflow.yml', name: 'Cloud/AWS AWS Provisioning Workflow', labels: 'aws', description: 'NEW AWS Provisioning Workflow' }
-        - { playbook: 'create_aws_ec2_rhel10.yml', name: 'Cloud/AWS Create RHEL10 instance', labels: ['aws', 'rhel'], description: 'Run a job template to create a RHEL 10 instance and provide some details' }
-        - { playbook: 'create_aws_ec2_rhel9.yml', name: 'Cloud/AWS Create RHEL9 instance', labels: ['aws', 'rhel'], description: 'Run a job template to create a RHEL 9 instance and provide some details' }
-        - { playbook: 'create_aws_vpc.yml', name: 'Cloud/AWS Create VCP', labels: 'aws', description: 'Run a job template to create an AWS VPC, and all its required networking' }
-        - { playbook: 'snapshot_aws_ec2.yml', name: 'Cloud/AWS Snapshot ec2 instance', labels: 'aws', description: 'Run a job template to capture a snapshot of an AWS ec2 instance' }
+    # - name: Create the AWS related job templates
+    #   ansible.controller.job_template:
+    #     name: "{{ item.name }}"
+    #     description: "{{ item.description }}"
+    #     job_type: "run"
+    #     organization: "Default"
+    #     inventory: "AWS Inventory"
+    #     ask_inventory_on_launch: true
+    #     ask_credential_on_launch: true
+    #     project: "SelfService Demo playbooks"
+    #     playbook: "playbooks/{{ item.playbook }}"
+    #     credentials:
+    #       - "AWS Credentials"
+    #     labels: "{{ item.labels }}"
+    #     state: "present"
+    #   with_items:
+    #     - { playbook: 'New AWS Provisioning Workflow.yml', name: 'Cloud/AWS AWS Provisioning Workflow', labels: 'aws', description: 'NEW AWS Provisioning Workflow' }
+    #     - { playbook: 'create_aws_ec2_rhel10.yml', name: 'Cloud/AWS Create RHEL10 instance', labels: ['aws', 'rhel'], description: 'Run a job template to create a RHEL 10 instance and provide some details' }
+    #     - { playbook: 'create_aws_ec2_rhel9.yml', name: 'Cloud/AWS Create RHEL9 instance', labels: ['aws', 'rhel'], description: 'Run a job template to create a RHEL 9 instance and provide some details' }
+    #     - { playbook: 'create_aws_vpc.yml', name: 'Cloud/AWS Create VCP', labels: 'aws', description: 'Run a job template to create an AWS VPC, and all its required networking' }
+    #     - { playbook: 'snapshot_aws_ec2.yml', name: 'Cloud/AWS Snapshot ec2 instance', labels: 'aws', description: 'Run a job template to capture a snapshot of an AWS ec2 instance' }
 
-    - name: Create the Network related job templates
-      ansible.controller.job_template:
-        name: "{{ item.name }}"
-        description: "{{ item.description }}"
-        job_type: "run"
-        organization: "Default"
-        inventory: "Network Inventory"
-        ask_inventory_on_launch: true
-        ask_credential_on_launch: true
-        project: "SelfService Demo playbooks"
-        playbook: "playbooks/{{ item.playbook }}"
-        credentials:
-          - "Network Credentials"
-        labels: "network"
-        state: "present"
-      with_items:
-        - { playbook: 'network_backup_device.yml', name: 'Network/Backup Network Device', description: 'Run a job template to backup a network device' }
-        - { playbook: 'network_deploy_configuration.yml', name: 'Network/Deploy Network device configuration', description: 'Run a job template to APPLY a configuration or UPDATE a configuration on a network device' }
-        - { playbook: 'network_device_onboard.yml', name: 'Network/Onboard Network device', description: 'Run a job template to ONBOARD a network device' }
-        - { playbook: 'network_restore_device.yml', name: 'Network/Restore Network device', description: 'Run a job template to RESTORE a network device' }
+    # - name: Create the Network related job templates
+    #   ansible.controller.job_template:
+    #     name: "{{ item.name }}"
+    #     description: "{{ item.description }}"
+    #     job_type: "run"
+    #     organization: "Default"
+    #     inventory: "Network Inventory"
+    #     ask_inventory_on_launch: true
+    #     ask_credential_on_launch: true
+    #     project: "SelfService Demo playbooks"
+    #     playbook: "playbooks/{{ item.playbook }}"
+    #     credentials:
+    #       - "Network Credentials"
+    #     labels: "network"
+    #     state: "present"
+    #   with_items:
+    #     - { playbook: 'network_backup_device.yml', name: 'Network/Backup Network Device', description: 'Run a job template to backup a network device' }
+    #     - { playbook: 'network_deploy_configuration.yml', name: 'Network/Deploy Network device configuration', description: 'Run a job template to APPLY a configuration or UPDATE a configuration on a network device' }
+    #     - { playbook: 'network_device_onboard.yml', name: 'Network/Onboard Network device', description: 'Run a job template to ONBOARD a network device' }
+    #     - { playbook: 'network_restore_device.yml', name: 'Network/Restore Network device', description: 'Run a job template to RESTORE a network device' }
 
-    - name: Create the RHEL related job templates
-      ansible.controller.job_template:
-        name: "{{ item.name }}"
-        description: "{{ item.description }}"
-        job_type: "run"
-        organization: "Default"
-        inventory: "RHEL Inventory"
-        ask_inventory_on_launch: true
-        ask_credential_on_launch: true
-        project: "SelfService Demo playbooks"
-        playbook: "playbooks/{{ item.playbook }}"
-        credentials:
-          - "RHEL - SSH Credentials"
-        labels: "{{ item.labels }}"
-        state: "present"
-      with_items:
-        - { playbook: 'deploy_application_to_rhel.yml', name: 'Linux/RHEL Deploy Applications to RHEL', labels: 'rhel', description: 'Run a job template to deploy applications to RHEL servers' }
-        - { playbook: 'install_nginx.yml', name: 'Linux/RHEL Install NGINX on RHEL', labels: 'rhel', description: 'Run a job template to install NGINX on RHEL' }
-        - { playbook: 'patch_rhel_servers.yml', name: 'Linux/RHEL Patch RHEL Servers', labels: 'rhel', description: 'Run a job template to patch RHEL servers' }
-        - { playbook: 'start_rhel_service.yml', name: 'Linux/RHEL START Service on RHEL', labels: 'rhel', description: 'Run a job template to START a Linux service that you provide on RHEL' }
-        - { playbook: 'stop_rhel_service.yml', name: 'Linux/RHEL STOP Service on RHEL', labels: 'rhel', description: 'Run a job template to STOP a Linux service that you provide on RHEL' }
-        - { playbook: 'update_rhel_time_server.yml', name: 'RHEL / Update RHEL Time Servers', labels: ['rhel', 'custom'], description: 'The Imported CUSTOM template in Self-Service portal will point to this job template' }
+    # - name: Create the RHEL related job templates
+    #   ansible.controller.job_template:
+    #     name: "{{ item.name }}"
+    #     description: "{{ item.description }}"
+    #     job_type: "run"
+    #     organization: "Default"
+    #     inventory: "RHEL Inventory"
+    #     ask_inventory_on_launch: true
+    #     ask_credential_on_launch: true
+    #     project: "SelfService Demo playbooks"
+    #     playbook: "playbooks/{{ item.playbook }}"
+    #     credentials:
+    #       - "RHEL - SSH Credentials"
+    #     labels: "{{ item.labels }}"
+    #     state: "present"
+    #   with_items:
+    #     - { playbook: 'deploy_application_to_rhel.yml', name: 'Linux/RHEL Deploy Applications to RHEL', labels: 'rhel', description: 'Run a job template to deploy applications to RHEL servers' }
+    #     - { playbook: 'install_nginx.yml', name: 'Linux/RHEL Install NGINX on RHEL', labels: 'rhel', description: 'Run a job template to install NGINX on RHEL' }
+    #     - { playbook: 'patch_rhel_servers.yml', name: 'Linux/RHEL Patch RHEL Servers', labels: 'rhel', description: 'Run a job template to patch RHEL servers' }
+    #     - { playbook: 'start_rhel_service.yml', name: 'Linux/RHEL START Service on RHEL', labels: 'rhel', description: 'Run a job template to START a Linux service that you provide on RHEL' }
+    #     - { playbook: 'stop_rhel_service.yml', name: 'Linux/RHEL STOP Service on RHEL', labels: 'rhel', description: 'Run a job template to STOP a Linux service that you provide on RHEL' }
+    #     - { playbook: 'update_rhel_time_server.yml', name: 'RHEL / Update RHEL Time Servers', labels: ['rhel', 'custom'], description: 'The Imported CUSTOM template in Self-Service portal will point to this job template' }
 
 ########################################################
     - name: Cloud/AWS Create RHEL10 instance
@@ -158,7 +158,7 @@
         organization: Default
         inventory: AWS Inventory
         project: SelfService Demo playbooks
-        playbook: create_aws_ec2_rhel10.yml
+        playbook: playbooks/create_aws_ec2_rhel10.yml
         credentials:
           - AWS Credentials
         labels:
@@ -189,7 +189,7 @@
         organization: Default
         inventory: AWS Inventory
         project: SelfService Demo playbooks
-        playbook: create_aws_ec2_rhel9.yml
+        playbook: playbooks/create_aws_ec2_rhel9.yml
         credentials:
           - AWS Credentials
         labels:
@@ -220,7 +220,7 @@
         organization: Default
         inventory: AWS Inventory
         project: SelfService Demo playbooks
-        playbook: create_aws_vpc.yml
+        playbook: playbooks/create_aws_vpc.yml
         credentials:
           - AWS Credentials
         labels:
@@ -247,7 +247,7 @@
         organization: Default
         inventory: AWS Inventory
         project: SelfService Demo playbooks
-        playbook: snapshot_aws_ec2.yml
+        playbook: playbooks/snapshot_aws_ec2.yml
         credentials:
           - AWS Credentials
         labels:
@@ -275,7 +275,7 @@
         organization: Default
         inventory: Network Inventory
         project: SelfService Demo playbooks
-        playbook: network_backup_device.yml
+        playbook: playbooks/network_backup_device.yml
         credentials:
           - Network Credentials
         labels:
@@ -307,7 +307,7 @@
         organization: Default
         inventory: Network Inventory
         project: SelfService Demo playbooks
-        playbook: network_deploy_configuration.yml
+        playbook: playbooks/network_deploy_configuration.yml
         credentials:
           - Network Credentials
         labels:
@@ -340,7 +340,7 @@
         organization: Default
         inventory: Network Inventory
         project: SelfService Demo playbooks
-        playbook: network_device_onboard.yml
+        playbook: playbooks/network_device_onboard.yml
         credentials:
           - Network Credentials
         labels:
@@ -373,7 +373,7 @@
         organization: Default
         inventory: Network Inventory
         project: SelfService Demo playbooks
-        playbook: network_restore_device.yml
+        playbook: playbooks/network_restore_device.yml
         credentials:
           - Network Credentials
         labels:
@@ -405,7 +405,7 @@
         organization: Default
         inventory: RHEL Inventory
         project: SelfService Demo playbooks
-        playbook: deploy_application_to_rhel.yml
+        playbook: playbooks/deploy_application_to_rhel.yml
         credentials:
           - RHEL - SSH Credentials
         labels:
@@ -448,7 +448,7 @@
         organization: Default
         inventory: RHEL Inventory
         project: SelfService Demo playbooks
-        playbook: install_nginx.yml
+        playbook: playbooks/install_nginx.yml
         credentials:
           - RHEL - SSH Credentials
         labels:
@@ -480,7 +480,7 @@
         organization: Default
         inventory: RHEL Inventory
         project: SelfService Demo playbooks
-        playbook: patch_rhel_servers.yml
+        playbook: playbooks/patch_rhel_servers.yml
         credentials:
           - RHEL - SSH Credentials
         labels:
@@ -509,7 +509,7 @@
         organization: Default
         inventory: RHEL Inventory
         project: SelfService Demo playbooks
-        playbook: start_rhel_service.yml
+        playbook: playbooks/start_rhel_service.yml
         credentials:
           - RHEL - SSH Credentials
         labels:
@@ -547,7 +547,7 @@
         organization: Default
         inventory: RHEL Inventory
         project: SelfService Demo playbooks
-        playbook: stop_rhel_service.yml
+        playbook: playbooks/stop_rhel_service.yml
         credentials:
           - RHEL - SSH Credentials
         labels:
