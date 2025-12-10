@@ -11,6 +11,7 @@ metadata:
     - operations
     - intermediate
     - rhel
+    - custom
 spec:
   type: service
   presentation:
