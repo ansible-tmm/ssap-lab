@@ -1,0 +1,26 @@
+---
+# Creates AAP-Automation-Portal-Lab/hello-portal
+# Set portal_github_token as a JT extra variable.
+
+- name: Create hello-portal GitHub repo
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Create repository
+      ansible.builtin.uri:
+        url: https://api.github.com/orgs/AAP-Automation-Portal-Lab/repos
+        method: POST
+        headers:
+          Authorization: "Bearer {{ portal_github_token }}"
+          Accept: application/vnd.github+json
+        body_format: json
+        body:
+          name: hello-portal
+          private: false
+          auto_init: true
+        status_code: [201, 422]
+
+    - name: Show repo URL
+      ansible.builtin.debug:
+        msg: https://github.com/AAP-Automation-Portal-Lab/hello-portal
