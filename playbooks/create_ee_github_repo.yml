@@ -1,26 +1,97 @@
 ---
-# Creates AAP-Automation-Portal-Lab/hello-portal
-# Set portal_github_token as a JT extra variable.
+# Creates AAP-Automation-Portal-Lab/hello-portal and sets Hub Actions secrets.
+#
+# JT credentials / extra vars:
+#   portal_github_token  — from Portal GitHub Token credential (injector)
+#   hub_token            — Hub token with Galaxy + registry push (same value for all five)
 
 - name: Create hello-portal GitHub repo
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    github_org: AAP-Automation-Portal-Lab
+    github_repo: hello-portal
+    hub_secret_names:
+      - ANSIBLE_GALAXY_SERVER_PRIVATE_HUB_COMMUNITY_TOKEN
+      - ANSIBLE_GALAXY_SERVER_PRIVATE_HUB_PUBLISHED_TOKEN
+      - ANSIBLE_GALAXY_SERVER_PRIVATE_HUB_RH_CERTIFIED_TOKEN
+      - ANSIBLE_GALAXY_SERVER_PRIVATE_HUB_VALIDATED_TOKEN
+      - REGISTRY_PASSWORD
   tasks:
+    - name: Require hub_token
+      ansible.builtin.assert:
+        that:
+          - hub_token is defined
+          - (hub_token | trim | length) > 0
+        fail_msg: Set hub_token as a JT extra variable (Hub token for Galaxy + registry push)
+
     - name: Create repository
       ansible.builtin.uri:
-        url: https://api.github.com/orgs/AAP-Automation-Portal-Lab/repos
+        url: "https://api.github.com/orgs/{{ github_org }}/repos"
         method: POST
         headers:
-          Authorization: "Bearer {{ portal_github_token }}"
+          Authorization: "Bearer {{ portal_github_token | trim }}"
           Accept: application/vnd.github+json
         body_format: json
         body:
-          name: hello-portal
+          name: "{{ github_repo }}"
           private: false
           auto_init: true
         status_code: [201, 422]
 
+    - name: Get Actions secrets public key
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/actions/secrets/public-key"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+        status_code: 200
+      register: _secrets_pubkey
+
+    - name: Ensure PyNaCl for secret encryption
+      ansible.builtin.pip:
+        name: pynacl
+        state: present
+        extra_args: --user
+
+    - name: Encrypt hub_token for Actions secrets
+      ansible.builtin.command:
+        cmd: python3 -
+        stdin: |
+          from base64 import b64encode
+          from nacl import encoding, public
+          import os
+          public_key = public.PublicKey(
+              os.environ["GITHUB_KEY"].encode("utf-8"),
+              encoding.Base64Encoder(),
+          )
+          sealed_box = public.SealedBox(public_key)
+          encrypted = sealed_box.encrypt(os.environ["SECRET_VALUE"].encode("utf-8"))
+          print(b64encode(encrypted).decode("utf-8"))
+      environment:
+        GITHUB_KEY: "{{ _secrets_pubkey.json.key }}"
+        SECRET_VALUE: "{{ hub_token | trim }}"
+      register: _hub_secret_encrypted
+      changed_when: false
+      no_log: true
+
+    - name: Set Hub Actions secrets
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/actions/secrets/{{ item }}"
+        method: PUT
+        headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+        body_format: json
+        body:
+          encrypted_value: "{{ _hub_secret_encrypted.stdout }}"
+          key_id: "{{ _secrets_pubkey.json.key_id }}"
+        status_code: [201, 204]
+      loop: "{{ hub_secret_names }}"
+      no_log: true
+
     - name: Show repo URL
       ansible.builtin.debug:
-        msg: https://github.com/AAP-Automation-Portal-Lab/hello-portal
+        msg: "https://github.com/{{ github_org }}/{{ github_repo }} (Hub Actions secrets set)"
