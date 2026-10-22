@@ -1,11 +1,22 @@
 ---
-# Creates AAP-Automation-Portal-Lab/hello-portal and sets Hub Actions secrets.
+# Creates AAP-Automation-Portal-Lab/hello-portal (or github_repo) and sets
+# Actions secrets/variables for EE Builder builds.
 #
 # JT credentials / extra vars:
-#   portal_github_token  — from Portal GitHub Token credential (injector)
-#   hub_token            — Hub token with Galaxy + registry push (same value for all five)
+#   portal_github_token   — org admin PAT (Portal GitHub Token injector)
+#   aap_host              — gateway URL, e.g. https://user1-aap-….apps.…
+#   aap_admin_username    — default: admin
+#   aap_admin_password    — AAP admin password (also used as REGISTRY_PASSWORD)
+#
+# Flow:
+#   1) POST /api/gateway/v1/tokens/ as admin → hub_galaxy_token
+#   2) Repo secrets: four ANSIBLE_GALAXY_* = gateway token; REGISTRY_PASSWORD = admin password
+#   3) Repo variable: REGISTRY_USERNAME = admin
+#
+# Do NOT put console.redhat.com user/password in these Actions secrets.
+# Those are for Hub *remote sync* (offline token), not EE build Galaxy auth.
 
-- name: Create hello-portal GitHub repo
+- name: Create EE GitHub repo and set Hub Actions secrets
   hosts: localhost
   connection: local
   gather_facts: false
@@ -17,14 +28,46 @@
       - ANSIBLE_GALAXY_SERVER_PRIVATE_HUB_PUBLISHED_TOKEN
       - ANSIBLE_GALAXY_SERVER_PRIVATE_HUB_RH_CERTIFIED_TOKEN
       - ANSIBLE_GALAXY_SERVER_PRIVATE_HUB_VALIDATED_TOKEN
-      - REGISTRY_PASSWORD
   tasks:
-    - name: Require hub_token
+    - name: Require inputs
       ansible.builtin.assert:
         that:
-          - hub_token is defined
-          - (hub_token | trim | length) > 0
-        fail_msg: Set hub_token as a JT extra variable (Hub token for Galaxy + registry push)
+          - portal_github_token is defined
+          - (portal_github_token | trim | length) > 0
+          - aap_host is defined
+          - (aap_host | trim | length) > 0
+          - aap_admin_password is defined
+          - (aap_admin_password | trim | length) > 0
+        fail_msg: >-
+          Need portal_github_token, aap_host (gateway URL), and aap_admin_password.
+          Galaxy secrets are minted from the gateway; REGISTRY_PASSWORD is the admin password.
+
+    - name: Normalize AAP host
+      ansible.builtin.set_fact:
+        _aap_base: "{{ aap_host | trim | regex_replace('/$', '') }}"
+
+    - name: Mint platform gateway API token for Galaxy secrets
+      ansible.builtin.uri:
+        url: "{{ _aap_base }}/api/gateway/v1/tokens/"
+        method: POST
+        url_username: "{{ aap_admin_username }}"
+        url_password: "{{ aap_admin_password | trim }}"
+        force_basic_auth: true
+        validate_certs: false
+        headers:
+          Content-Type: application/json
+        body_format: json
+        body:
+          description: "ee-builder-actions-{{ github_repo }}"
+          scope: write
+        status_code: [200, 201]
+      register: _gateway_token
+      no_log: true
+
+    - name: Set hub_galaxy_token from gateway response
+      ansible.builtin.set_fact:
+        hub_galaxy_token: "{{ _gateway_token.json.token }}"
+      no_log: true
 
     - name: Create repository
       ansible.builtin.uri:
@@ -39,6 +82,7 @@
           private: false
           auto_init: true
         status_code: [201, 422]
+      no_log: true
 
     - name: Get Actions secrets public key
       ansible.builtin.uri:
@@ -49,6 +93,7 @@
           Accept: application/vnd.github+json
         status_code: 200
       register: _secrets_pubkey
+      no_log: true
 
     - name: Ensure PyNaCl for secret encryption
       ansible.builtin.pip:
@@ -56,7 +101,7 @@
         state: present
         extra_args: --user
 
-    - name: Encrypt hub_token for Actions secrets
+    - name: Encrypt a secret value for GitHub Actions
       ansible.builtin.command:
         cmd: python3 -
         stdin: |
@@ -72,12 +117,25 @@
           print(b64encode(encrypted).decode("utf-8"))
       environment:
         GITHUB_KEY: "{{ _secrets_pubkey.json.key }}"
-        SECRET_VALUE: "{{ hub_token | trim }}"
-      register: _hub_secret_encrypted
+        SECRET_VALUE: "{{ item.value }}"
+      register: _encrypted_secrets
       changed_when: false
       no_log: true
+      loop:
+        - name: galaxy
+          value: "{{ hub_galaxy_token }}"
+        - name: registry
+          value: "{{ aap_admin_password | trim }}"
+      loop_control:
+        label: "{{ item.name }}"
 
-    - name: Set Hub Actions secrets
+    - name: Map encrypted payloads
+      ansible.builtin.set_fact:
+        _enc_galaxy: "{{ _encrypted_secrets.results[0].stdout }}"
+        _enc_registry: "{{ _encrypted_secrets.results[1].stdout }}"
+      no_log: true
+
+    - name: Set Galaxy Actions secrets (gateway token)
       ansible.builtin.uri:
         url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/actions/secrets/{{ item }}"
         method: PUT
@@ -86,12 +144,60 @@
           Accept: application/vnd.github+json
         body_format: json
         body:
-          encrypted_value: "{{ _hub_secret_encrypted.stdout }}"
+          encrypted_value: "{{ _enc_galaxy }}"
           key_id: "{{ _secrets_pubkey.json.key_id }}"
         status_code: [201, 204]
-      loop: "{{ hub_secret_names }}"
+      loop: "{{ galaxy_secret_names }}"
+      no_log: true
+
+    - name: Set REGISTRY_PASSWORD Actions secret (admin password)
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/actions/secrets/REGISTRY_PASSWORD"
+        method: PUT
+        headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+        body_format: json
+        body:
+          encrypted_value: "{{ _enc_registry }}"
+          key_id: "{{ _secrets_pubkey.json.key_id }}"
+        status_code: [201, 204]
+      no_log: true
+
+    - name: Set REGISTRY_USERNAME Actions variable
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/actions/variables/REGISTRY_USERNAME"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+        body_format: json
+        body:
+          name: REGISTRY_USERNAME
+          value: "{{ aap_admin_username }}"
+        status_code: [201, 409]
+      register: _reg_user_var
+      failed_when: false
+      no_log: true
+
+    - name: Update REGISTRY_USERNAME if it already exists
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/actions/variables/REGISTRY_USERNAME"
+        method: PATCH
+        headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+        body_format: json
+        body:
+          name: REGISTRY_USERNAME
+          value: "{{ aap_admin_username }}"
+        status_code: [204]
+      when: _reg_user_var.status | default(0) == 409
       no_log: true
 
     - name: Show repo URL
       ansible.builtin.debug:
-        msg: "https://github.com/{{ github_org }}/{{ github_repo }} (Hub Actions secrets set)"
+        msg: >-
+          https://github.com/{{ github_org }}/{{ github_repo }}
+          (Galaxy secrets=gateway token; REGISTRY_PASSWORD=admin password;
+          REGISTRY_USERNAME={{ aap_admin_username }})
