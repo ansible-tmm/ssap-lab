@@ -147,7 +147,7 @@
           encrypted_value: "{{ _enc_galaxy }}"
           key_id: "{{ _secrets_pubkey.json.key_id }}"
         status_code: [201, 204]
-      loop: "{{ galaxy_secret_names }}"
+      loop: "{{ hub_secret_names }}"
       no_log: true
 
     - name: Set REGISTRY_PASSWORD Actions secret (admin password)
