@@ -84,6 +84,47 @@
         status_code: [201, 422]
       no_log: true
 
+    # workflow_dispatch requires ee-build.yml on the default branch. Fine-grained
+    # PATs need Workflows: Read and write (Contents alone → 403 on this path).
+    - name: Look up existing ee-build.yml on default branch
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/contents/.github/workflows/ee-build.yml"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+        status_code: [200, 404]
+      register: _ee_workflow_get
+      no_log: true
+
+    - name: Seed ee-build.yml on default branch for workflow_dispatch
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/contents/.github/workflows/ee-build.yml"
+        method: PUT
+        headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+        body_format: json
+        body:
+          message: Seed ee-build.yml so portal can workflow_dispatch
+          content: "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../files/ee-build.yml') | b64encode }}"
+          branch: main
+        status_code: [200, 201, 403]
+      register: _ee_workflow_seed
+      when: (_ee_workflow_get.status | default(0)) == 404
+      no_log: true
+
+    - name: Fail clearly when PAT cannot write workflow files
+      ansible.builtin.fail:
+        msg: >-
+          Could not write .github/workflows/ee-build.yml (HTTP
+          {{ _ee_workflow_seed.status | default('?') }}). Fine-grained PAT needs
+          Workflows: Read and write (classic: workflow scope). Contents alone is
+          not enough for paths under .github/workflows/.
+      when:
+        - _ee_workflow_seed is not skipped
+        - (_ee_workflow_seed.status | default(0)) not in [200, 201]
+
     - name: Get Actions secrets public key
       ansible.builtin.uri:
         url: "https://api.github.com/repos/{{ github_org }}/{{ github_repo }}/actions/secrets/public-key"
