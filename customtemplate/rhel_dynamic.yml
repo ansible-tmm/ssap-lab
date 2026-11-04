@@ -154,21 +154,10 @@ spec:
           default: "If everything looks correct, click Update to start the process."
   steps:
     - id: review
-      name: Review Selections
+      name: Log Selections
       action: debug:log
       input:
-        message: |
-          Review
-          Server Group: ${{ parameters.inventory.name }}
-          Credentials: ${{ parameters.credentials | map(attribute='name') | join(', ') }}
-          NTP Servers: ${{ parameters.ntpServers }}
-          Timezone: ${{ parameters.timezone }}
-          Advanced Options: ${{ 'Enabled' if parameters.showAdvanced else 'Disabled' }}
-          Max Sync Delay: ${{ parameters.maxSyncDelay if parameters.showAdvanced else 'n/a' }}
-          Min NTP Peers: ${{ parameters.minPeers if parameters.showAdvanced else 'n/a' }}
-          Allow Reboot for Transactional Updates: ${{ parameters.transactionalUpdateRebootOk if parameters.showAdvanced else 'n/a' }}
-          Restart Time Service: ${{ parameters.serviceRestartConfirmation }}
-          Restart Reason: ${{ parameters.restartReason if parameters.serviceRestartConfirmation == 'Yes' else 'n/a' }}
+        message: ${{ "Review\nServer Group: " + parameters.inventory.name + "\nNTP Servers: " + parameters.ntpServers + "\nTimezone: " + parameters.timezone + "\nAdvanced Options: " + (parameters.showAdvanced ? "Enabled" : "Disabled") + "\nMax Sync Delay: " + (parameters.showAdvanced ? parameters.maxSyncDelay : "n/a") + "\nMin NTP Peers: " + (parameters.showAdvanced ? parameters.minPeers : "n/a") + "\nAllow Reboot for Transactional Updates: " + (parameters.showAdvanced ? parameters.transactionalUpdateRebootOk : "n/a") + "\nRestart Time Service: " + parameters.serviceRestartConfirmation + "\nRestart Reason: " + (parameters.serviceRestartConfirmation === "Yes" ? parameters.restartReason : "n/a") }}
 
     - id: launch-job
       name: Update Time Servers
