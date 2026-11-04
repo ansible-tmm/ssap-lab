@@ -21,13 +21,14 @@ spec:
   parameters:
     - title: Access & Time server settings
       required:
-        - token
         - inventory
         - credentials
         - ntpServers
         - serviceRestartConfirmation
       properties:
-        token:
+        # Token is injected by Create Task into scaffolder secrets (aapToken),
+        # not form values. Keep the field for UX only; do not require it.
+        aapToken:
           title: 🔑 Access Token
           type: string
           description: |
@@ -173,7 +174,7 @@ spec:
       name: Update Time Servers
       action: rhaap:launch-job-template
       input:
-        token: ${{ parameters.token }}
+        token: ${{ secrets.aapToken }}
         values:
           template: RHEL / Update RHEL Time Servers
           inventory: ${{ parameters.inventory }}
