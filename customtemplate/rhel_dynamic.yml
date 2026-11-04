@@ -157,7 +157,7 @@ spec:
       name: Log Selections
       action: debug:log
       input:
-        message: ${{ "Review\nServer Group: " + parameters.inventory.name + "\nNTP Servers: " + parameters.ntpServers + "\nTimezone: " + parameters.timezone + "\nAdvanced Options: " + (parameters.showAdvanced ? "Enabled" : "Disabled") + "\nMax Sync Delay: " + (parameters.showAdvanced ? parameters.maxSyncDelay : "n/a") + "\nMin NTP Peers: " + (parameters.showAdvanced ? parameters.minPeers : "n/a") + "\nAllow Reboot for Transactional Updates: " + (parameters.showAdvanced ? parameters.transactionalUpdateRebootOk : "n/a") + "\nRestart Time Service: " + parameters.serviceRestartConfirmation + "\nRestart Reason: " + (parameters.serviceRestartConfirmation === "Yes" ? parameters.restartReason : "n/a") }}
+        message: '${{ "Review\nServer Group: " + parameters.inventory.name + "\nNTP Servers: " + parameters.ntpServers + "\nTimezone: " + parameters.timezone + "\nAdvanced Options: " + (parameters.showAdvanced ? "Enabled" : "Disabled") + "\nMax Sync Delay: " + (parameters.showAdvanced ? parameters.maxSyncDelay : "n/a") + "\nMin NTP Peers: " + (parameters.showAdvanced ? parameters.minPeers : "n/a") + "\nAllow Reboot for Transactional Updates: " + (parameters.showAdvanced ? parameters.transactionalUpdateRebootOk : "n/a") + "\nRestart Time Service: " + parameters.serviceRestartConfirmation + "\nRestart Reason: " + (parameters.serviceRestartConfirmation === "Yes" ? parameters.restartReason : "n/a") }}'
 
     - id: launch-job
       name: Update Time Servers
