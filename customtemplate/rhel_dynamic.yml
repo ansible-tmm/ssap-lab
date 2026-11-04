@@ -159,16 +159,16 @@ spec:
       input:
         message: |
           Review
-          Server Group: ${{ parameters.inventory }}
-          Credentials: ${{ parameters.credentials }}
+          Server Group: ${{ parameters.inventory.name }}
+          Credentials: ${{ parameters.credentials | map(attribute='name') | join(', ') }}
           NTP Servers: ${{ parameters.ntpServers }}
           Timezone: ${{ parameters.timezone }}
-          Advanced Options: ${{ parameters.showAdvanced ? 'Enabled' : 'Disabled' }}
-          ${{ parameters.showAdvanced ? 'Max Sync Delay: ' + parameters.maxSyncDelay + ' ms' : '' }}
-          ${{ parameters.showAdvanced ? 'Min NTP Peers: ' + parameters.minPeers : '' }}
-          ${{ parameters.showAdvanced ? 'Allow Reboot for Transactional Updates: ' + parameters.transactionalUpdateRebootOk : '' }}
+          Advanced Options: ${{ 'Enabled' if parameters.showAdvanced else 'Disabled' }}
+          Max Sync Delay: ${{ parameters.maxSyncDelay if parameters.showAdvanced else 'n/a' }}
+          Min NTP Peers: ${{ parameters.minPeers if parameters.showAdvanced else 'n/a' }}
+          Allow Reboot for Transactional Updates: ${{ parameters.transactionalUpdateRebootOk if parameters.showAdvanced else 'n/a' }}
           Restart Time Service: ${{ parameters.serviceRestartConfirmation }}
-          ${{ parameters.serviceRestartConfirmation === 'Yes' ? 'Restart Reason: ' + parameters.restartReason : '' }}
+          Restart Reason: ${{ parameters.restartReason if parameters.serviceRestartConfirmation == 'Yes' else 'n/a' }}
 
     - id: launch-job
       name: Update Time Servers
