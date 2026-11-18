@@ -6,17 +6,44 @@
     ansible_deprecation_warnings: false
     ansible_command_warnings: false
   tasks:
-    - name: Update RHEL time servers
+    - name: Validating time server configuration
       ansible.builtin.debug:
         msg: |
-          Updating the RHEL time servers
+          Validating time server configuration...
+          NTP Servers: {{ user_ntp_servers | default('0.rhel.pool.ntp.org, 1.rhel.pool.ntp.org') }}
+          Timezone: {{ user_timezone | default('UTC') }}
+          Restart chronyd service: {{ restart_chronyd_service | default('Yes') }}
+          Restart reason: {{ restart_reason | default('Not specified') }}
 
-    - name: Waiting for RHEL time servers update to complete
+    - name: Configuring NTP servers
+      ansible.builtin.debug:
+        msg: |
+          Configuring NTP servers: {{ user_ntp_servers | default('0.rhel.pool.ntp.org, 1.rhel.pool.ntp.org') }}
+
+    - name: Setting timezone
+      ansible.builtin.debug:
+        msg: |
+          Setting timezone to: {{ user_timezone | default('UTC') }}
+
+    - name: Applying time server configuration
       ansible.builtin.command: sleep 3
       changed_when: false
       no_log: true
 
+    - name: Restarting chronyd service
+      ansible.builtin.debug:
+        msg: |
+          Restarting chronyd service... done
+
+    - name: Displaying advanced options
+      ansible.builtin.debug:
+        msg: |
+          Max sync delay: {{ max_sync_delay | default('Not specified') }} ms
+          Minimum NTP peers: {{ min_peers | default('Not specified') }}
+          Transactional update reboot: {{ user_timesync_transactional_update_reboot_ok | default('Not specified') }}
+      when: max_sync_delay is defined or min_peers is defined
+
     - name: Update RHEL time servers...complete
       ansible.builtin.debug:
         msg: |
-          Updating the RHEL time servers...completed
+          Time server configuration updated successfully.

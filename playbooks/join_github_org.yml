@@ -1,0 +1,159 @@
+---
+# Invites a student GitHub user into the lab team with push-only access
+# on an existing EE repo (enough to open PRs / dispatch Actions).
+#
+# JT credentials / extra vars:
+#   portal_github_token — org admin PAT (Portal GitHub Token injector)
+#   github_username     — survey (student's GitHub login)
+#   github_org          — default AAP-Automation-Portal-Lab
+#   github_team         — e.g. lab-{{ guid }} (JT extra_var)
+#   github_repo         — e.g. {{ guid }}-user1-ee (JT extra_var; must already exist)
+#
+# Permissions granted (only):
+#   - team membership role: member (not maintainer)
+#   - team permission on github_repo: push (not admin)
+# Never grants org owner/admin.
+
+- name: Join GitHub lab team for EE Builder
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    github_org: AAP-Automation-Portal-Lab
+  tasks:
+    - name: Require inputs
+      ansible.builtin.assert:
+        that:
+          - portal_github_token is defined
+          - (portal_github_token | trim | length) > 0
+          - github_username is defined
+          - (github_username | trim | length) > 0
+          - github_team is defined
+          - (github_team | trim | length) > 0
+          - github_repo is defined
+          - (github_repo | trim | length) > 0
+        fail_msg: >-
+          Need portal_github_token, github_username (survey), github_team, and github_repo.
+
+    - name: Normalize inputs
+      ansible.builtin.set_fact:
+        _gh_user: "{{ github_username | trim | regex_replace('^@', '') }}"
+        _gh_org: "{{ github_org | trim }}"
+        _gh_team: "{{ github_team | trim }}"
+        _gh_repo: "{{ github_repo | trim }}"
+        _gh_team_slug: "{{ github_team | trim | lower | regex_replace('[^a-z0-9]+', '-') | regex_replace('^-|-$', '') }}"
+        _gh_headers:
+          Authorization: "Bearer {{ portal_github_token | trim }}"
+          Accept: application/vnd.github+json
+          X-GitHub-Api-Version: "2022-11-28"
+
+    - name: Look up team by slug
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/{{ _gh_org }}/teams/{{ _gh_team_slug }}"
+        method: GET
+        headers: "{{ _gh_headers }}"
+        status_code: [200, 404]
+      register: _team_get
+      no_log: true
+
+    - name: Create team when missing
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/{{ _gh_org }}/teams"
+        method: POST
+        headers: "{{ _gh_headers }}"
+        body_format: json
+        body:
+          name: "{{ _gh_team }}"
+          description: "EE Builder lab team (push on assigned EE repos only)"
+          privacy: closed
+        status_code: [201, 422]
+      register: _team_create
+      when: _team_get.status == 404
+      no_log: true
+
+    - name: Resolve team slug
+      ansible.builtin.set_fact:
+        _team_slug: >-
+          {{
+            _team_get.json.slug
+            if _team_get.status == 200
+            else (
+              _team_create.json.slug
+              if (_team_create is not skipped and _team_create.status == 201)
+              else _gh_team_slug
+            )
+          }}
+
+    - name: Re-fetch team after create conflict
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/{{ _gh_org }}/teams/{{ _gh_team_slug }}"
+        method: GET
+        headers: "{{ _gh_headers }}"
+        status_code: 200
+      register: _team_refetch
+      when:
+        - _team_get.status == 404
+        - _team_create is not skipped
+        - _team_create.status == 422
+      no_log: true
+
+    - name: Use refetched slug after 422
+      ansible.builtin.set_fact:
+        _team_slug: "{{ _team_refetch.json.slug }}"
+      when:
+        - _team_refetch is not skipped
+        - _team_refetch is succeeded
+
+    - name: Verify EE repo exists
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/{{ _gh_org }}/{{ _gh_repo }}"
+        method: GET
+        headers: "{{ _gh_headers }}"
+        status_code: [200, 404]
+      register: _repo_get
+      no_log: true
+
+    - name: Fail when EE repo is missing
+      ansible.builtin.assert:
+        that:
+          - _repo_get.status == 200
+        fail_msg: >-
+          Repo {{ _gh_org }}/{{ _gh_repo }} does not exist.
+          Create it first (provision or create_ee_github_repo.yml) before joining students.
+
+    - name: Grant team push on EE repo
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/{{ _gh_org }}/teams/{{ _team_slug }}/repos/{{ _gh_org }}/{{ _gh_repo }}"
+        method: PUT
+        headers: "{{ _gh_headers }}"
+        body_format: json
+        body:
+          permission: push
+        status_code: [204, 200]
+      no_log: true
+
+    - name: Add user to team as member
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/{{ _gh_org }}/teams/{{ _team_slug }}/memberships/{{ _gh_user }}"
+        method: PUT
+        headers: "{{ _gh_headers }}"
+        body_format: json
+        body:
+          role: member
+        status_code: [200, 201]
+      register: _membership
+      no_log: true
+
+    - name: Summarize join result
+      ansible.builtin.debug:
+        msg:
+          - "GitHub user '{{ _gh_user }}' → team '{{ _team_slug }}' (role=member)"
+          - "Team permission on {{ _gh_org }}/{{ _gh_repo }}: push"
+          - "Membership state: {{ _membership.json.state | default('unknown') }}"
+          - >-
+            {{
+              'Accept the org/team invite email (or https://github.com/orgs/' ~ _gh_org ~ '/invitation) if state=pending.'
+              if (_membership.json.state | default('')) == 'pending'
+              else 'Membership active — use existing repo ' ~ _gh_org ~ '/' ~ _gh_repo ~ ' in EE Builder.'
+            }}
+          - "Repo: https://github.com/{{ _gh_org }}/{{ _gh_repo }}"
